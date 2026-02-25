@@ -60,6 +60,7 @@ def add(a: int, b: int) -> int:
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
+
 # Tool registry for dynamic execution by name
 TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
     "output_every_func_return_type": output_every_func_return_type,
@@ -70,7 +71,24 @@ TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
 # ==========================
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a precise function-calling assistant.
+Your ONLY task is to generate a JSON object to call a tool based on the available registry.
+
+### AVAILABLE TOOLS:
+1. `output_every_func_return_type`: Analyzes a Python file and returns "function_name: return_type" for all top-level functions.
+   - Args: `file_path` (string, optional. If empty, it analyzes the current script).
+
+### OUTPUT FORMAT:
+You must return ONLY a valid JSON object. No markdown code blocks, no preamble, no explanations.
+Format:
+{"tool": "tool_name", "args": {"arg_name": "value"}}
+
+### EXAMPLES:
+User: Call the tool to check functions in my script.
+Assistant: {"tool": "output_every_func_return_type", "args": {"file_path": ""}}
+
+"""
 
 
 def resolve_path(p: str) -> str:
@@ -109,6 +127,7 @@ def run_model_for_tool_call(system_prompt: str) -> Dict[str, Any]:
         options={"temperature": 0.3},
     )
     content = response.message.content
+    print(content)
     return extract_tool_call(content)
 
 
@@ -125,7 +144,9 @@ def execute_tool_call(call: Dict[str, Any]) -> str:
 
     # Best-effort path resolution if a file_path arg is present
     if "file_path" in args and isinstance(args["file_path"], str):
-        args["file_path"] = resolve_path(args["file_path"]) if str(args["file_path"]) != "" else __file__
+        args["file_path"] = (
+            resolve_path(args["file_path"]) if str(args["file_path"]) != "" else __file__
+        )
     elif "file_path" not in args:
         # Provide default for tools expecting file_path
         args["file_path"] = __file__
