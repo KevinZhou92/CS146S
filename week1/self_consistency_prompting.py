@@ -9,7 +9,22 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are an expert of breaking an input into multiple steps and think through each steps to get the answer
+
+
+#Example
+Q: Henry made two stops during his 60-mile bike trip. He first stopped after 20
+miles. His second stop was 15 miles before the end of the trip. How many miles
+did he travel between his first and second stops?
+
+A: After Henry stopped after 20 miles, he still have 60-20=40 miles to go, he then stops at 15 miles
+before the end, so in total he ride for 60-15=45 miles, he first ride for 20 miles, so the distance between
+his first stop and second stop is 25 miles
+#Example
+
+
+"""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".
