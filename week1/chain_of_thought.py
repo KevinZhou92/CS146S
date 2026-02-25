@@ -8,7 +8,16 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a calculator, you will be given a math expression, you will calulate the result and out put it
+
+# Example1
+3^{3}(mod 10), you will first calculate 3 ^{3} which is 9, then you will caculate 9 mod 10, which is 9
+
+The final out put is 9
+# Example1
+
+"""
 
 
 USER_PROMPT = """
@@ -68,5 +77,3 @@ def test_your_prompt(system_prompt: str) -> bool:
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)
-
-
