@@ -1,34 +1,33 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from fastapi import APIRouter, Depends, HTTPException
 
-from fastapi import APIRouter, HTTPException
-
-from .. import db
+from ..db import Database, database
+from ..schemas import NoteCreate, NoteRead
 
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
 
-@router.post("")
-def create_note(payload: Dict[str, Any]) -> Dict[str, Any]:
-    content = str(payload.get("content", "")).strip()
-    if not content:
-        raise HTTPException(status_code=400, detail="content is required")
-    note_id = db.insert_note(content)
-    note = db.get_note(note_id)
-    return {
-        "id": note["id"],
-        "content": note["content"],
-        "created_at": note["created_at"],
-    }
+def get_db() -> Database:
+    return database
 
 
-@router.get("/{note_id}")
-def get_single_note(note_id: int) -> Dict[str, Any]:
+@router.get("", response_model=list[NoteRead])
+def list_notes(db = Depends(get_db)) -> list[NoteRead]:
+    rows = db.list_notes()
+    return [NoteRead(**row) for row in rows]
+
+
+@router.post("", response_model=NoteRead)
+def create_note(payload: NoteCreate, db = Depends(get_db)) -> NoteRead:
+    note = db.insert_note(payload.content)
+    return NoteRead(**note)
+
+
+@router.get("/{note_id}", response_model=NoteRead)
+def get_single_note(note_id: int, db = Depends(get_db)) -> NoteRead:
     row = db.get_note(note_id)
     if row is None:
         raise HTTPException(status_code=404, detail="note not found")
-    return {"id": row["id"], "content": row["content"], "created_at": row["created_at"]}
-
-
+    return NoteRead(**row)
